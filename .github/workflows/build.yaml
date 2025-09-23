@@ -5,6 +5,10 @@ on:
     - cron: "0 */3 * * *"   # every 3 hours (UTC)
   workflow_dispatch:
 
+concurrency:
+  group: fpl-data
+  cancel-in-progress: true
+
 jobs:
   build:
     runs-on: ubuntu-latest
@@ -12,12 +16,15 @@ jobs:
       contents: write
     steps:
       - uses: actions/checkout@v4
+
+      # Node 20 includes fetch() natively; we don't need npm install
       - uses: actions/setup-node@v4
         with:
           node-version: 20
-      - run: npm ci || npm i
+
       - name: Build data.json
-        run: npm run build:data
+        run: node scripts/build.mjs
+
       - name: Commit & push
         run: |
           if [[ -n "$(git status --porcelain)" ]]; then

@@ -4,7 +4,49 @@ body{ margin:0; font-family:var(--font); background:#fafafa; color:#111 }
 .container{ max-width:1000px; margin:0 auto; padding:16px }
 h1{ margin:8px 0 4px; font-size:1.5rem }
 .meta{ color:#555; margin:0 0 12px; font-size:.9rem }
+
+/* Table shell */
 .table-wrap{ overflow-x:auto; background:#fff; border:1px solid #eee; border-radius:10px }
-table{ width:100%; border-collapse:collapse; min-width:600px }
-th,td{ padding:var(--pad); text-align:left; border-bottom:1px solid #f0f0f0; white-space:nowrap }
+table{ width:100%; border-collapse:collapse; min-width:700px }
+
+/* Default: center numeric-looking table content */
+th,td{ padding:var(--pad); text-align:center; border-bottom:1px solid #f0f0f0; white-space:nowrap }
 th{ background:#f8f8f8; position:sticky; top:0 }
+
+/* Column-specific alignment & styling
+   Current order: Rank | Team | Total | GW1..GWn | Activated Chips | Latest Transfers
+*/
+th:nth-child(2), td:nth-child(2){ /* Team column left-aligned + vertical separator to Total */
+  text-align:left;
+  border-right:2px solid #e9e9e9;
+}
+td:nth-child(3){ /* Total bold */
+  font-weight:700;
+}
+th:last-child, td:last-child{ /* Latest Transfers column left-aligned */
+  text-align:left;
+}
+th:nth-last-child(2), td:nth-last-child(2){ /* Activated Chips column left-aligned */
+  text-align:left;
+}
+
+/* Badges for transfers (and spacing) */
+.badge{
+  display:inline-block;
+  padding:2px 6px;
+  border:1px solid #ddd;
+  border-radius:8px;
+  font-size:0.85rem;
+  margin-right:6px;
+}
+.transfers{ font-size:0.92rem; color:#333; }
+.transfers strong{ font-weight:700; }
+
+/* Hover nicety */
+tr:hover td{ background:#fcfcfc }
+
+/* Small screens */
+@media (max-width: 600px){
+  h1{ font-size:1.25rem }
+  .meta{ font-size:0.8rem }
+}

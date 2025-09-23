@@ -39,6 +39,7 @@ async function main() {
     const entryId = r.entry;
 
     const history = await getJson(`${BASE}/entry/${entryId}/history/`);
+    const chips = (history?.chips || []).map(c => ({ event: c.event, name: c.name }));
     const transfers = await getJson(`${BASE}/entry/${entryId}/transfers/`);
 
     // GW points up to current GW (hide unplayed)
@@ -56,6 +57,7 @@ async function main() {
       playerName: r.player_name,
       total: r.total,
       entryId,
+      chips,
       gwPoints,
       latestGwTransfers
     });

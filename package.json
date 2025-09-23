@@ -1,0 +1,8 @@
+{
+    "name": "fpl-mini-league",
+    "private": true,
+    "type": "module",
+    "scripts": {
+      "build:data": "node scripts/build.mjs"
+    }
+  }

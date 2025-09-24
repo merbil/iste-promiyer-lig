@@ -1,160 +1,173 @@
 :root{
-    --pad:12px;
-    --pad-sm:8px;
-    --font: system-ui, -apple-system, Segoe UI, Roboto, Helvetica, Arial, sans-serif;
-    --hdr1: 42px;                 /* height of the first header row */
-    --border:#e7e7e7;
-    --border-strong:#d6d6d6;
-    --bg:#fafafa;
-    --bg-card:#ffffff;
-    --bg-th:#f8f8f8;
-    --sum:#e6f5ea;                /* light PL green for Sum columns */
-  }
-  
-  *{ box-sizing:border-box }
-  html,body{ height:100% }
-  body{
-    margin:0;
-    font-family:var(--font);
-    background:var(--bg);
-    color:#111;
-  }
-  
-  /* Layout */
-  .container{ max-width:1100px; margin:0 auto; padding:20px }
-  h1{ margin:8px 0 6px; font-size:1.6rem; letter-spacing:.2px }
-  .meta{ color:#555; margin:0 0 14px; font-size:.92rem }
-  
-  /* Card shell */
-  .table-wrap{
-    overflow-x:auto;
-    background:var(--bg-card);
-    border:1px solid var(--border);
-    border-radius:12px;
-    box-shadow:0 1px 2px rgba(0,0,0,.03);
-  }
-  
-  /* Table */
-  table{
-    width:100%;
-    border-collapse:separate;     /* nicer separators with rounded container */
-    border-spacing:0;
-    min-width:760px;
-  }
-  
-  /* Cells */
-  th,td{
-    padding:var(--pad);
-    text-align:center;
-    border-bottom:1px solid var(--border);
-    white-space:nowrap;
-    background-clip:padding-box;
-    line-height:1.2;
-  }
-  td{ padding-top:calc(var(--pad) + 2px); padding-bottom:calc(var(--pad) + 2px) }
-  
-  /* Header rows (two-tier) */
-  thead tr:first-child th{
-    background:var(--bg-th);
-    position:sticky; top:0; z-index:3;
-  }
-  thead tr:nth-child(2) th{
-    background:var(--bg-th);
-    position:sticky; top:var(--hdr1); z-index:2;
-    border-left:none !important;
-    border-right:none !important;
-  }
-  thead tr:nth-child(2) th.sep-left{ border-left:2px solid var(--border-strong) !important; }
-  
-  /* Sticky first two columns (Rank, Team) – only top header row + body cells */
-  thead tr:first-child th:nth-child(1),
-  tbody td:nth-child(1){
-    position:sticky; left:0; z-index:5; background:#fff;
-    min-width:64px; width:64px;
-  }
-  thead tr:first-child th:nth-child(2),
-  tbody td:nth-child(2){
-    position:sticky; left:64px; z-index:5; background:#fff;
-    min-width:240px; width:240px;
-  }
-  
-  /* Column alignment & dividers */
-  th:nth-child(2), td:nth-child(2){ /* Team */
-    text-align:left;
-    border-right:2px solid var(--border);
-  }
-  td:nth-child(3){ /* Total */
-    font-weight:700;
-    border-right:2px solid var(--border);
-  }
-  th:nth-child(3){ border-right:2px solid var(--border); }
-  th:last-child, td:last-child{ text-align:left }             /* Latest Transfers */
-  th:nth-last-child(2), td:nth-last-child(2){ text-align:left } /* Activated Chips */
-  
-  /* Period visuals */
-  .future { color:#999; font-style:italic }
-  .sep-left { border-left:2px solid var(--border-strong) !important }
-  .period-even { background:#fbfbff }
-  .period-odd  { background:#ffffff }
-  
-  /* Sum columns — tint full column */
-  th.sum-col,
-  td.sum-col,
-  th[data-col="sum"],
-  td[data-col="sum"],
-  th[data-col*="sum" i],
-  td[data-col*="sum" i] {
-    background: var(--sum) !important;
-    font-weight: 700;
-  }
-  
-  /* Badges */
-  .badge{
-    display:inline-block;
-    padding:2px 8px;
-    border:1px solid #ddd;
-    border-radius:10px;
-    font-size:0.85rem;
-    margin-right:8px;
-    margin-bottom:2px;
-  }
-  .badge.in  { border-color:#2ecc71; color:#2ecc71; font-weight:600 }
-  .badge.out { border-color:#e74c3c; color:#e74c3c; font-weight:600 }
-  .transfers{ font-size:0.92rem; color:#333 }
-  .transfers strong{ font-weight:700 }
-  
-  /* Row hover */
-  tbody tr:hover td{ background:#fcfcfc }
-  
-  /* Sort indicators */
-  thead th[data-dir="asc"]::after  { content:" ▲"; font-size:.85em }
-  thead th[data-dir="desc"]::after { content:" ▼"; font-size:.85em }
-  
-  /* Small screens */
-  @media (max-width: 600px){
-    .container{ padding:14px }
-    h1{ font-size:1.35rem }
-    .meta{ font-size:.82rem }
-    thead tr:first-child th:nth-child(1), tbody td:nth-child(1){ min-width:56px; width:56px }
-    thead tr:first-child th:nth-child(2), tbody td:nth-child(2){ min-width:200px; width:200px }
-  }
-  
-  /* Vertical separator to the right of GW Leads (header and body) */
-  thead tr:first-child th[data-key="gwLeads"],
-  tbody td:nth-child(4){
-    border-right: 2px solid var(--border) !important;
-  }
-  
-  /* Compact sizing for GW Leads column (narrow but readable) */
-  thead th[data-key="gwLeads"],
-  tbody td:nth-child(4){
-    min-width: 72px;
-    width: 72px;
-    padding-left: var(--pad-sm);
-    padding-right: var(--pad-sm);
-    text-align: center;
-  }
-  thead th[data-key="gwLeads"]::after{
-    font-size: 0.95rem;   /* slightly smaller header text */
-    line-height: 1.05;
-  }
+  --pad:12px;
+  --pad-sm:8px;
+  --font: system-ui, -apple-system, Segoe UI, Roboto, Helvetica, Arial, sans-serif;
+  --hdr1: 42px;                 /* height of the first header row */
+  --border:#e7e7e7;
+  --border-strong:#d6d6d6;
+  --bg:#fafafa;
+  --bg-card:#ffffff;
+  --bg-th:#f8f8f8;
+  --sum:#e6f5ea;                /* light PL green for Sum columns */
+}
+
+*{ box-sizing:border-box }
+html,body{ height:100% }
+body{
+  margin:0;
+  font-family:var(--font);
+  background:var(--bg);
+  color:#111;
+}
+
+/* Layout */
+.container{ max-width:1100px; margin:0 auto; padding:20px }
+h1{ margin:8px 0 6px; font-size:1.6rem; letter-spacing:.2px }
+.meta{ color:#555; margin:0 0 14px; font-size:.92rem }
+
+/* Card shell */
+.table-wrap{
+  overflow-x:auto;
+  background:var(--bg-card);
+  border:1px solid var(--border);
+  border-radius:12px;
+  box-shadow:0 1px 2px rgba(0,0,0,.03);
+}
+
+/* Table */
+table{
+  width:100%;
+  border-collapse:separate;     /* nicer separators with rounded container */
+  border-spacing:0;
+  min-width:760px;
+}
+
+/* Cells */
+th,td{
+  padding:var(--pad);
+  text-align:center;
+  border-bottom:1px solid var(--border);
+  white-space:nowrap;
+  background-clip:padding-box;
+  line-height:1.2;
+}
+td{ padding-top:calc(var(--pad) + 2px); padding-bottom:calc(var(--pad) + 2px) }
+
+/* Header rows (two-tier) */
+thead tr:first-child th{
+  background:var(--bg-th);
+  position:sticky; top:0; z-index:3;
+}
+thead tr:nth-child(2) th{
+  background:var(--bg-th);
+  position:sticky; top:var(--hdr1); z-index:2;
+  border-left:none !important;
+  border-right:none !important;
+}
+thead tr:nth-child(2) th.sep-left{ border-left:2px solid var(--border-strong) !important; }
+
+/* Sticky first two columns (Rank, Team) – only top header row + body cells */
+thead tr:first-child th:nth-child(1),
+tbody td:nth-child(1){
+  position:sticky; left:0; z-index:5; background:#fff;
+  min-width:64px; width:64px;
+}
+thead tr:first-child th:nth-child(2),
+tbody td:nth-child(2){
+  position:sticky; left:64px; z-index:5; background: var(--team-bg, #fff);
+  min-width:240px; width:240px;
+}
+
+/* Column alignment & dividers */
+th:nth-child(2), td:nth-child(2){ /* Team */
+  text-align:left;
+  border-right:2px solid var(--border);
+}
+td:nth-child(3){ /* Total */
+  font-weight:700;
+  border-right:2px solid var(--border);
+}
+th:nth-child(3){ border-right:2px solid var(--border); }
+th:last-child, td:last-child{ text-align:left }             /* Latest Transfers */
+th:nth-last-child(2), td:nth-last-child(2){ text-align:left } /* Activated Chips */
+
+/* Period visuals */
+.future { color:#999; font-style:italic }
+.sep-left { border-left:2px solid var(--border-strong) !important }
+.period-even { background:#fbfbff }
+.period-odd  { background:#ffffff }
+
+/* Sum columns — tint full column */
+th.sum-col,
+td.sum-col,
+th[data-col="sum"],
+td[data-col="sum"],
+th[data-col*="sum" i],
+td[data-col*="sum" i] {
+  background: var(--sum) !important;
+  font-weight: 700;
+}
+
+/* Badges */
+.badge{
+  display:inline-block;
+  padding:2px 8px;
+  border:1px solid #ddd;
+  border-radius:10px;
+  font-size:0.85rem;
+  margin-right:8px;
+  margin-bottom:2px;
+}
+.badge.in  { border-color:#2ecc71; color:#2ecc71; font-weight:600 }
+.badge.out { border-color:#e74c3c; color:#e74c3c; font-weight:600 }
+.transfers{ font-size:0.92rem; color:#333 }
+.transfers strong{ font-weight:700 }
+
+/* Row hover */
+tbody tr:hover td{ background:#fcfcfc }
+
+/* Sort indicators */
+thead th[data-dir="asc"]::after  { content:" ▲"; font-size:.85em }
+thead th[data-dir="desc"]::after { content:" ▼"; font-size:.85em }
+
+/* Small screens */
+@media (max-width: 600px){
+  .container{ padding:14px }
+  h1{ font-size:1.35rem }
+  .meta{ font-size:.82rem }
+  thead tr:first-child th:nth-child(1), tbody td:nth-child(1){ min-width:56px; width:56px }
+  thead tr:first-child th:nth-child(2), tbody td:nth-child(2){ min-width:200px; width:200px }
+}
+
+/* Vertical separator to the right of GW Leads (header and body) */
+thead tr:first-child th[data-key="gwLeads"],
+tbody td:nth-child(4){
+  border-right: 2px solid var(--border) !important;
+}
+
+/* Compact sizing for GW Leads column (narrow but readable) */
+thead th[data-key="gwLeads"],
+tbody td:nth-child(4){
+  min-width: 72px;
+  width: 72px;
+  padding-left: var(--pad-sm);
+  padding-right: var(--pad-sm);
+  text-align: center;
+}
+thead th[data-key="gwLeads"]::after{
+  font-size: 0.95rem;   /* slightly smaller header text */
+  line-height: 1.05;
+}
+
+/* === Leader highlights (Team column) — clean version ===
+   The Team column uses background: var(--team-bg, #fff) for sticky cells.
+   We set that variable on leader cells and also set background directly
+   to win over generic hover rules. */
+
+/* Set tint via CSS variable + direct background */
+tbody td.leader-period { --team-bg: #e8f1ff; background: #e8f1ff !important; }
+/* Outline for current GW leader */
+tbody td.leader-gw { box-shadow: inset 0 0 0 3px #ffd54f; }
+
+/* Keep the tint on hover */
+tbody tr:hover td.leader-period { background: #e8f1ff !important; }

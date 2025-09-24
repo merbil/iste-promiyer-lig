@@ -23,13 +23,57 @@ async function load() {
     document.getElementById('tbody').innerHTML = `<tr><td>Error loading data</td></tr>`;
     return;
   }
-  const data = await res.json();
+  const raw = await res.text();
+  let data;
+  try {
+    data = JSON.parse(raw);
+  } catch (err) {
+    console.error('Failed to parse data.json. First 200 chars:', raw.slice(0, 200));
+    throw err;
+  }
 
   // Header meta: current GW + last update
   const currentGW = data.currentGW;
-  const lastUpdated = new Date(data.generatedAt);
+  const gen = (typeof data.generatedAt === 'number' || typeof data.generatedAt === 'string')
+    ? data.generatedAt
+    : Date.now();
+  const lastUpdated = new Date(gen);
+  let formattedDate;
+  try {
+    const tz = (Intl.DateTimeFormat().resolvedOptions().timeZone) || 'UTC';
+
+    // Date as DD/MM/YYYY
+    const dateStr = lastUpdated.toLocaleDateString('en-GB', {
+      timeZone: tz,
+      day: '2-digit', month: '2-digit', year: 'numeric'
+    });
+
+    // Time as HH:MM (24h)
+    const timeStr = lastUpdated.toLocaleTimeString('en-GB', {
+      timeZone: tz,
+      hour: '2-digit', minute: '2-digit', hour12: false
+    });
+
+    // Short timezone name (CEST/CET). If not available, fall back to IANA tz.
+    let shortTz = '';
+    try {
+      const parts = new Intl.DateTimeFormat('en-GB', { timeZone: tz, timeZoneName: 'short' })
+        .formatToParts(lastUpdated);
+      shortTz = parts.find(p => p.type === 'timeZoneName')?.value || '';
+    } catch {}
+
+    formattedDate = `${dateStr} ${timeStr} ${shortTz || tz}`;
+  } catch (e) {
+    console.warn('Falling back date formatting:', e);
+    formattedDate = lastUpdated.toLocaleString();
+  }
   document.querySelector('.meta').innerHTML =
-    `GW ${currentGW} • Last update: <span id="last-update">${lastUpdated.toLocaleString()}</span>`;
+    `GW ${currentGW} • <span id="last-update">${formattedDate}</span>
+     <span class="legend" style="margin-left:8px; color:#666; font-size:.88em">
+       <span class="swatch period" style="display:inline-block;width:10px;height:10px;border-radius:2px;background:#e8f1ff;border:1px solid #c8daf8;margin:0 6px 0 10px;vertical-align:middle"></span> Period leader
+       <span class="sep" style="margin:0 6px">•</span>
+       <span class="swatch gw" style="display:inline-block;width:10px;height:10px;border-radius:2px;background:#fff4c2;border:2px solid #ffd54f;margin:0 6px;vertical-align:middle"></span> GW leader
+     </span>`;
 
   // Build dynamic columns list (keys and labels) in the order to render.
   // We keep a flat 'columns' array for rendering/sorting,
@@ -118,7 +162,8 @@ async function load() {
   ].join('');
 
   // Build rows from payload
-  let rows = (data.managers || []).map(m => {
+  const managers = Array.isArray(data.managers) ? data.managers : [];
+  let rows = managers.map(m => {
     const row = {
       teamName: m.teamName,
       total: m.total,
@@ -169,6 +214,34 @@ async function load() {
     const award = leaders.length > 0 ? (1 / leaders.length) : 0;
     leaders.forEach(r => { r.gwLeads += award; });
   }
+
+  // Leader flags
+  // Latest GW leader(s)
+  const gwKey = `gw_${currentGW}`;
+  const gwScores = rows.map(r => r[gwKey]).filter(v => Number.isFinite(v));
+  if (gwScores.length) {
+    const maxGw = Math.max(...gwScores);
+    rows.forEach(r => { r._isGwLeader = (r[gwKey] === maxGw); });
+  } else {
+    rows.forEach(r => { r._isGwLeader = false; });
+  }
+
+  // Current period leader(s) — only the period that contains currentGW
+  const currentPeriod = visiblePeriods.find(p => currentGW >= p.start && currentGW <= p.end);
+  if (currentPeriod) {
+    const sumKey = `sum_${currentPeriod.key}`;
+    const periodSums = rows.map(r => r[sumKey]).filter(v => Number.isFinite(v));
+    if (periodSums.length) {
+      const maxPeriod = Math.max(...periodSums);
+      rows.forEach(r => { r._isPeriodLeader = (r[sumKey] === maxPeriod); });
+    } else {
+      rows.forEach(r => { r._isPeriodLeader = false; });
+    }
+  } else {
+    rows.forEach(r => { r._isPeriodLeader = false; });
+  }
+
+  console.debug('Loaded rows:', rows.length, 'currentGW:', currentGW);
 
   render(rows, columns, subHeader);
 
@@ -250,6 +323,14 @@ function render(rows, columns, subHeader) {
         }
 
         const v = r[c.key];
+        if (c.key === 'teamName') {
+          const leaderClasses = [
+            r._isGwLeader ? 'leader-gw' : '',
+            r._isPeriodLeader ? 'leader-period' : ''
+          ].filter(Boolean).join(' ');
+          const allClasses = [classList, leaderClasses].filter(Boolean).join(' ');
+          return `<td class="${allClasses}">${v ?? ''}</td>`;
+        }
         return `<td class="${classList}">${v ?? ''}</td>`;
       }).join('')}
     </tr>

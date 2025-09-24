@@ -37,7 +37,8 @@ async function load() {
   const columns = [
     { key: 'rank', label: 'Rank', kind: 'static' },
     { key: 'teamName', label: 'Team', kind: 'static' },
-    { key: 'total', label: 'Total', kind: 'numeric' }
+    { key: 'total', label: 'Total', kind: 'numeric' },
+    { key: 'gwLeads', label: 'GW Leads', kind: 'numeric' }
   ];
 
   // Visible periods: only those that have started.
@@ -99,6 +100,7 @@ async function load() {
       <th rowspan="2" data-key="rank">Rank</th>
       <th rowspan="2" data-key="teamName" class="sep-left-after">Team</th>
       <th rowspan="2" data-key="total" class="sep-left">Total</th>
+      <th rowspan="2" data-key="gwLeads">GW Leads</th>
       ${topHeader.map(h => `<th colspan="${h.colspan}" class="${h.boundaryLeft ? 'sep-left' : ''}">${h.label}</th>`).join('')}
       <th rowspan="2" data-key="chips" class="sep-left">Activated Chips</th>
       <th rowspan="2" data-key="latest">Latest Transfers</th>
@@ -134,7 +136,11 @@ async function load() {
     r.rank = i + 1;
     if (Array.isArray(r.chips)) {
       const chip = r.chips.find(c => Number(c.event) === Number(currentGW));
+      // Store a lowercase helper for logic, and keep display text in r.chips
+      r._chipThisGW = chip ? String(chip.name).toLowerCase() : '';
       r.chips = chip ? chip.name : '';
+    } else {
+      r._chipThisGW = '';
     }
   });
 
@@ -149,6 +155,20 @@ async function load() {
       r[`sum_${p.key}`] = sum;
     });
   });
+
+  // Compute GW Leads: for each GW up to currentGW, distribute 1 point among top scorers
+  // Initialize counters
+  rows.forEach(r => { r.gwLeads = 0; });
+  for (let gw = 1; gw <= currentGW; gw++) {
+    // gather scores for this GW
+    const scores = rows.map(r => r[`gw_${gw}`]).filter(v => Number.isFinite(v));
+    if (!scores.length) continue;
+    const max = Math.max(...scores);
+    if (!Number.isFinite(max)) continue;
+    const leaders = rows.filter(r => r[`gw_${gw}`] === max);
+    const award = leaders.length > 0 ? (1 / leaders.length) : 0;
+    leaders.forEach(r => { r.gwLeads += award; });
+  }
 
   render(rows, columns, subHeader);
 
@@ -199,11 +219,15 @@ function render(rows, columns, subHeader) {
     <tr>
       ${columns.map((c, idx) => {
         if (c.key === 'latest') {
-          const txt = (r.latest && r.latest.length)
-            ? r.latest.map(t =>
-                `<span class="badge in"><strong>in:</strong> ${t.in.name}</span> <span class="badge out"><strong>out:</strong> ${t.out.name}</span>`
-              ).join(' ')
-            : '<span class="badge">—</span>';
+          const chip = (r._chipThisGW || '').toLowerCase();
+          const suppress = chip === 'wildcard' || chip === 'freehit' || chip === 'free_hit' || chip === 'free hit';
+          const txt = suppress
+            ? '<span class="badge">—</span>'
+            : ((r.latest && r.latest.length)
+                ? r.latest.map(t =>
+                    `<span class="badge in"><strong>in:</strong> ${t.in.name}</span> <span class="badge out"><strong>out:</strong> ${t.out.name}</span>`
+                  ).join(' ')
+                : '<span class="badge">—</span>');
           return `<td class="transfers">${txt}</td>`;
         }
         if (c.key === 'chips') {
@@ -213,10 +237,19 @@ function render(rows, columns, subHeader) {
           return `<td class="sep-left">${html}</td>`;
         }
         // Normal cells, with extra border on period boundaries
-        const v = r[c.key];
         const boundaryClass = boundaryLeftKeys.has(c.key) ? 'sep-left' : '';
         const isSumCell = c.key && c.key.startsWith('sum_');
         const classList = [boundaryClass, isSumCell ? 'sum-col' : ''].filter(Boolean).join(' ');
+
+        if (c.key === 'gwLeads') {
+          const raw = r.gwLeads ?? 0;
+          if (!raw) return `<td class="${classList}"></td>`;
+          const rounded = Math.round(raw * 10) / 10;
+          const display = Number.isInteger(rounded) ? String(rounded) : rounded.toFixed(1);
+          return `<td class="${classList}">${display}</td>`;
+        }
+
+        const v = r[c.key];
         return `<td class="${classList}">${v ?? ''}</td>`;
       }).join('')}
     </tr>

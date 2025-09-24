@@ -138,3 +138,23 @@ thead th[data-dir="desc"]::after { content:" ▼"; font-size:.85em }
   thead tr:first-child th:nth-child(1), tbody td:nth-child(1){ min-width:56px; width:56px }
   thead tr:first-child th:nth-child(2), tbody td:nth-child(2){ min-width:200px; width:200px }
 }
+
+/* Vertical separator to the right of GW Leads (header and body) */
+thead tr:first-child th[data-key="gwLeads"],
+tbody td:nth-child(4){
+  border-right: 2px solid var(--border) !important;
+}
+
+/* Compact sizing for GW Leads column (narrow but readable) */
+thead th[data-key="gwLeads"],
+tbody td:nth-child(4){
+  min-width: 72px;
+  width: 72px;
+  padding-left: var(--pad-sm);
+  padding-right: var(--pad-sm);
+  text-align: center;
+}
+thead th[data-key="gwLeads"]::after{
+  font-size: 0.95rem;   /* slightly smaller header text */
+  line-height: 1.05;
+}

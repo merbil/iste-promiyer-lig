@@ -98,13 +98,15 @@ th:nth-last-child(2), td:nth-last-child(2){ text-align:left } /* Activated Chips
 .period-odd  { background:#ffffff }
 
 /* Sum columns — tint full column */
-.sum-col{ background:var(--sum) !important; font-weight:700 }
-th.sum-col.period-even,
-th.sum-col.period-odd,
-td.sum-col.period-even,
-td.sum-col.period-odd{ background:var(--sum) !important }
-tbody td.sum-col,
-tbody td[data-col^="sum_"]{ background:var(--sum) !important }
+th.sum-col,
+td.sum-col,
+th[data-col="sum"],
+td[data-col="sum"],
+th[data-col*="sum" i],
+td[data-col*="sum" i] {
+  background: var(--sum) !important;
+  font-weight: 700;
+}
 
 /* Badges */
 .badge{

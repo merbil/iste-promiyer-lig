@@ -20,5 +20,16 @@
     </div>
   </main>
   <script src="script.js"></script>
+  <script>
+    (function () {
+      var m = document.querySelector('meta[name="viewport"]');
+      if (!m) return;
+      if (window.screen.width <= 600) {
+        m.setAttribute('content', 'width=1100');
+      } else {
+        m.setAttribute('content', 'width=device-width, initial-scale=1');
+      }
+    })();
+  </script>
 </body>
 </html>

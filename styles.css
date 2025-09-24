@@ -1,52 +1,138 @@
-:root { --pad:12px; --font: system-ui, -apple-system, Segoe UI, Roboto, Helvetica, Arial, sans-serif; }
+:root{
+  --pad:12px;
+  --pad-sm:8px;
+  --font: system-ui, -apple-system, Segoe UI, Roboto, Helvetica, Arial, sans-serif;
+  --hdr1: 42px;                 /* height of the first header row */
+  --border:#e7e7e7;
+  --border-strong:#d6d6d6;
+  --bg:#fafafa;
+  --bg-card:#ffffff;
+  --bg-th:#f8f8f8;
+  --sum:#e6f5ea;                /* light PL green for Sum columns */
+}
+
 *{ box-sizing:border-box }
-body{ margin:0; font-family:var(--font); background:#fafafa; color:#111 }
-.container{ max-width:1000px; margin:0 auto; padding:16px }
-h1{ margin:8px 0 4px; font-size:1.5rem }
-.meta{ color:#555; margin:0 0 12px; font-size:.9rem }
-
-/* Table shell */
-.table-wrap{ overflow-x:auto; background:#fff; border:1px solid #eee; border-radius:10px }
-table{ width:100%; border-collapse:collapse; min-width:700px }
-
-/* Default: center numeric-looking table content */
-th,td{ padding:var(--pad); text-align:center; border-bottom:1px solid #f0f0f0; white-space:nowrap }
-th{ background:#f8f8f8; position:sticky; top:0 }
-
-/* Column-specific alignment & styling
-   Current order: Rank | Team | Total | GW1..GWn | Activated Chips | Latest Transfers
-*/
-th:nth-child(2), td:nth-child(2){ /* Team column left-aligned + vertical separator to Total */
-  text-align:left;
-  border-right:2px solid #e9e9e9;
+html,body{ height:100% }
+body{
+  margin:0;
+  font-family:var(--font);
+  background:var(--bg);
+  color:#111;
 }
-td:nth-child(3){ /* Total bold */
+
+/* Layout */
+.container{ max-width:1100px; margin:0 auto; padding:20px }
+h1{ margin:8px 0 6px; font-size:1.6rem; letter-spacing:.2px }
+.meta{ color:#555; margin:0 0 14px; font-size:.92rem }
+
+/* Card shell */
+.table-wrap{
+  overflow-x:auto;
+  background:var(--bg-card);
+  border:1px solid var(--border);
+  border-radius:12px;
+  box-shadow:0 1px 2px rgba(0,0,0,.03);
+}
+
+/* Table */
+table{
+  width:100%;
+  border-collapse:separate;     /* nicer separators with rounded container */
+  border-spacing:0;
+  min-width:760px;
+}
+
+/* Cells */
+th,td{
+  padding:var(--pad);
+  text-align:center;
+  border-bottom:1px solid var(--border);
+  white-space:nowrap;
+  background-clip:padding-box;
+  line-height:1.2;
+}
+td{ padding-top:calc(var(--pad) + 2px); padding-bottom:calc(var(--pad) + 2px) }
+
+/* Header rows (two-tier) */
+thead tr:first-child th{
+  background:var(--bg-th);
+  position:sticky; top:0; z-index:3;
+}
+thead tr:nth-child(2) th{
+  background:var(--bg-th);
+  position:sticky; top:var(--hdr1); z-index:2;
+  border-left:none !important;
+  border-right:none !important;
+}
+thead tr:nth-child(2) th.sep-left{ border-left:2px solid var(--border-strong) !important; }
+
+/* Sticky first two columns (Rank, Team) – only top header row + body cells */
+thead tr:first-child th:nth-child(1),
+tbody td:nth-child(1){
+  position:sticky; left:0; z-index:5; background:#fff;
+  min-width:64px; width:64px;
+}
+thead tr:first-child th:nth-child(2),
+tbody td:nth-child(2){
+  position:sticky; left:64px; z-index:5; background:#fff;
+  min-width:240px; width:240px;
+}
+
+/* Column alignment & dividers */
+th:nth-child(2), td:nth-child(2){ /* Team */
+  text-align:left;
+  border-right:2px solid var(--border);
+}
+td:nth-child(3){ /* Total */
   font-weight:700;
+  border-right:2px solid var(--border);
 }
-th:last-child, td:last-child{ /* Latest Transfers column left-aligned */
-  text-align:left;
-}
-th:nth-last-child(2), td:nth-last-child(2){ /* Activated Chips column left-aligned */
-  text-align:left;
-}
+th:nth-child(3){ border-right:2px solid var(--border); }
+th:last-child, td:last-child{ text-align:left }             /* Latest Transfers */
+th:nth-last-child(2), td:nth-last-child(2){ text-align:left } /* Activated Chips */
 
-/* Badges for transfers (and spacing) */
+/* Period visuals */
+.future { color:#999; font-style:italic }
+.sep-left { border-left:2px solid var(--border-strong) !important }
+.period-even { background:#fbfbff }
+.period-odd  { background:#ffffff }
+
+/* Sum columns — tint full column */
+.sum-col{ background:var(--sum) !important; font-weight:700 }
+th.sum-col.period-even,
+th.sum-col.period-odd,
+td.sum-col.period-even,
+td.sum-col.period-odd{ background:var(--sum) !important }
+tbody td.sum-col,
+tbody td[data-col^="sum_"]{ background:var(--sum) !important }
+
+/* Badges */
 .badge{
   display:inline-block;
-  padding:2px 6px;
+  padding:2px 8px;
   border:1px solid #ddd;
-  border-radius:8px;
+  border-radius:10px;
   font-size:0.85rem;
-  margin-right:6px;
+  margin-right:8px;
+  margin-bottom:2px;
 }
-.transfers{ font-size:0.92rem; color:#333; }
-.transfers strong{ font-weight:700; }
+.badge.in  { border-color:#2ecc71; color:#2ecc71; font-weight:600 }
+.badge.out { border-color:#e74c3c; color:#e74c3c; font-weight:600 }
+.transfers{ font-size:0.92rem; color:#333 }
+.transfers strong{ font-weight:700 }
 
-/* Hover nicety */
-tr:hover td{ background:#fcfcfc }
+/* Row hover */
+tbody tr:hover td{ background:#fcfcfc }
+
+/* Sort indicators */
+thead th[data-dir="asc"]::after  { content:" ▲"; font-size:.85em }
+thead th[data-dir="desc"]::after { content:" ▼"; font-size:.85em }
 
 /* Small screens */
 @media (max-width: 600px){
-  h1{ font-size:1.25rem }
-  .meta{ font-size:0.8rem }
+  .container{ padding:14px }
+  h1{ font-size:1.35rem }
+  .meta{ font-size:.82rem }
+  thead tr:first-child th:nth-child(1), tbody td:nth-child(1){ min-width:56px; width:56px }
+  thead tr:first-child th:nth-child(2), tbody td:nth-child(2){ min-width:200px; width:200px }
 }

@@ -43,8 +43,13 @@ async function main() {
     const transfers = await getJson(`${BASE}/entry/${entryId}/transfers/`);
 
     // GW points up to current GW (hide unplayed)
-    // Start with history (usually net for past GWs)
-    const gwMap = new Map((history?.current || []).map(x => [x.event, x.points]));
+    // Start with history but compute NET for past GWs = points - event_transfers_cost
+    const gwMap = new Map(
+      (history?.current || []).map(x => [
+        x.event,
+        (Number(x.points) || 0) - (Number(x.event_transfers_cost) || 0)
+      ])
+    );
 
     // For the current GW, ensure we use NET = points - event_transfers_cost
     try {
@@ -90,6 +95,26 @@ async function main() {
     }));
   }
 
+  // --- Validation: per-manager sum(gwPoints) should match reported total ---
+  // This helps catch any net/gross inconsistencies before we publish.
+  (() => {
+    const mismatches = [];
+    for (const m of managers) {
+      const sumGW = m.gwPoints.reduce((acc, v) => acc + (Number.isFinite(v) ? v : 0), 0);
+      if (sumGW !== m.total) {
+        mismatches.push({ team: m.teamName, entryId: m.entryId, total: m.total, sumGW });
+      }
+    }
+    if (mismatches.length) {
+      console.warn(`[VALIDATION] ${mismatches.length} manager(s) have total != sum(gwPoints):`);
+      mismatches.slice(0, 20).forEach(x =>
+        console.warn(` - ${x.team} (#${x.entryId}): total=${x.total}, sumGW=${x.sumGW}`)
+      );
+      if (mismatches.length > 20) console.warn(` ...and ${mismatches.length - 20} more`);
+    } else {
+      console.log('[VALIDATION] All totals match sum(gwPoints).');
+    }
+  })();
   // default sort: total desc
   managers.sort((a, b) => b.total - a.total);
 

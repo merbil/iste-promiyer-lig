@@ -2,29 +2,32 @@ name: Update FPL Data
 
 on:
   schedule:
-    - cron: "0 */3 * * *"   # every 3 hours (UTC)
+    - cron: "0 */3 * * *"
   workflow_dispatch:
 
 permissions:
   contents: write
 
-concurrency:
-  group: fpl-build
-  cancel-in-progress: false
-
 jobs:
   build:
     runs-on: ubuntu-latest
     steps:
-      - uses: actions/checkout@v4
+      - name: Checkout repository
+        uses: actions/checkout@v4
         with:
-          fetch-depth: 0            # allow rebase
+          fetch-depth: 0
 
-      - uses: actions/setup-node@v4
+      - name: Ensure latest main branch
+        run: |
+          git fetch origin main
+          git checkout -B main origin/main
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
         with:
           node-version: 20
 
-      - name: Install deps (if any)
+      - name: Install dependencies if lockfile exists
         run: |
           if [ -f package-lock.json ] || [ -f pnpm-lock.yaml ] || [ -f yarn.lock ]; then
             npm ci || npm install
@@ -35,16 +38,18 @@ jobs:
       - name: Build data.json
         run: node scripts/build.mjs
 
-      - name: Commit & push (rebase-safe)
+      - name: Commit and push changes
         run: |
           if [[ -n "$(git status --porcelain)" ]]; then
             git config user.name "github-actions[bot]"
             git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
             git add data.json
+            if git diff --cached --quiet; then
+              echo "No diff to commit."
+              exit 0
+            fi
             git commit -m "Update data.json"
-            git fetch origin main
-            git pull --rebase origin main
             git push origin HEAD:main
           else
-            echo "No changes."
+            echo "No changes detected."
           fi

@@ -43,7 +43,23 @@ async function main() {
     const transfers = await getJson(`${BASE}/entry/${entryId}/transfers/`);
 
     // GW points up to current GW (hide unplayed)
+    // Start with history (usually net for past GWs)
     const gwMap = new Map((history?.current || []).map(x => [x.event, x.points]));
+
+    // For the current GW, ensure we use NET = points - event_transfers_cost
+    try {
+      const picks = await getJson(`${BASE}/entry/${entryId}/event/${currentGW}/picks/`);
+      const eh = picks?.entry_history || {};
+      if (eh && Number.isFinite(Number(eh.points))) {
+        const gross = Number(eh.points) || 0;
+        const hit   = Number(eh.event_transfers_cost) || 0;
+        const net   = gross - hit;
+        gwMap.set(currentGW, net);
+      }
+    } catch (e) {
+      // If the picks endpoint fails, fall back to history value (often already net)
+    }
+
     const gwPoints = [];
     for (let gw = 1; gw <= currentGW; gw++) gwPoints.push(gwMap.get(gw) ?? null);
 

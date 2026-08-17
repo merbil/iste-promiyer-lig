@@ -2,16 +2,15 @@
 // Each period shows ALL its GWs once the period has started.
 // Sum column at the end of each period is a running total (so far).
 const PERIODS = [
-  { key: 'here_we_go',       name: 'Here We Go!',        start: 1,  end: 3 },
-  { key: 'early_wildcard',   name: 'Early Wildcard',     start: 4,  end: 7 },
-  { key: 'false_9',          name: 'False 9',            start: 8,  end: 11 },
-  { key: 'black_friday',     name: 'Black Friday',       start: 12, end: 13 },
-  { key: 'remembering_jota', name: 'Remembering Jota',   start: 14, end: 16 },
-  { key: 'afcon_drama',      name: 'AFCON Drama',        start: 17, end: 22 },
-  { key: 'valentines',       name: 'Valentines',         start: 23, end: 26 },
-  { key: 'ramadan_kareem',   name: 'Ramadan Kareem',     start: 27, end: 31 },
-  { key: 'flowers',          name: 'Flowers Everywhere', start: 32, end: 36 },
-  { key: 'fergie_time',      name: 'Fergie Time',        start: 37, end: 38 }
+  { key: 'world_cup_hangover',  name: 'World Cup Hangover', start: 1,  end: 5 },
+  { key: 'early_wildcard',      name: 'Early Wildcard',     start: 6,  end: 10 },
+  { key: 'black_friday',        name: 'Black Friday 🎁',     start: 11, end: 12 },
+  { key: 'get_ready_2027',      name: 'Get Ready for 2027',  start: 13, end: 16 },
+  { key: 'boxing_day',          name: 'Boxing Day 🗃️',       start: 17, end: 19 },
+  { key: 'rage_wildcard',       name: 'Rage Wildcard',       start: 20, end: 24 },
+  { key: 'national_breakup',    name: 'National Break-up',   start: 25, end: 30 },
+  { key: 'spring_break_return', name: 'Spring Break Return', start: 31, end: 35 },
+  { key: 'fergie_time',         name: 'Fergie Time',         start: 36, end: 38 }
 ];
 
 async function load() {

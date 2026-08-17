@@ -5,8 +5,10 @@ players, teams, fixtures, managers, and leagues. All endpoints return structured
 data and can be accessed directly via HTTPS.
 
 > **Note:** This is the *official game's* API, but it is **not officially documented
-> or supported** by the Premier League. It can change without warning. This file is a
-> community-maintained reference kept here so we don't have to hunt for it again.
+> or supported** by the Premier League. It can change without warning.
+>
+> This file is just a reference gathered on various subreddits and external links,
+> kept here so we don't have to hunt for it again.
 
 **Base URL:**
 

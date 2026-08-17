@@ -5,7 +5,7 @@ import { fileURLToPath } from 'url';
 const __dirname = path.dirname(fileURLToPath(import.meta.url));
 
 const BASE = 'https://fantasy.premierleague.com/api';
-const LEAGUE_ID = 22667;              // <-- your league id
+const LEAGUE_ID = 162916;              // <-- your league id
 const SLEEP_MS = 300;                 // be polite
 
 const sleep = (ms) => new Promise(r => setTimeout(r, ms));

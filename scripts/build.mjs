@@ -1,27 +1,27 @@
 import fs from 'fs/promises';
 import path from 'path';
 import { fileURLToPath } from 'url';
-
+ 
 const __dirname = path.dirname(fileURLToPath(import.meta.url));
-
+ 
 const BASE = 'https://fantasy.premierleague.com/api';
-const LEAGUE_ID = 162916;              // <-- your league id
+const LEAGUE_ID = 162916;             // <-- your league id
 const SLEEP_MS = 300;                 // be polite
-
+ 
 const sleep = (ms) => new Promise(r => setTimeout(r, ms));
 async function getJson(url) {
   const res = await fetch(url, { headers: { 'User-Agent': 'iste-promiyer-lig' }});
   if (!res.ok) throw new Error(`HTTP ${res.status} for ${url}`);
   return res.json();
 }
-
+ 
 async function main() {
   // current GW
   const bootstrap = await getJson(`${BASE}/bootstrap-static/`);
   const events = bootstrap.events || [];
   const currentEvent = events.find(e => e.is_current) || events.find(e => e.is_next) || events[events.length - 1];
   const currentGW = currentEvent?.id ?? events.length;
-
+ 
   // league standings (paginate)
   let page = 1, allEntries = [];
   while (true) {
@@ -32,16 +32,16 @@ async function main() {
     page += 1;
     await sleep(SLEEP_MS);
   }
-
+ 
   // per manager: gw points + transfers for current GW
   const managers = [];
   for (const r of allEntries) {
     const entryId = r.entry;
-
+ 
     const history = await getJson(`${BASE}/entry/${entryId}/history/`);
     const chips = (history?.chips || []).map(c => ({ event: c.event, name: c.name }));
     const transfers = await getJson(`${BASE}/entry/${entryId}/transfers/`);
-
+ 
     // GW points up to current GW (hide unplayed)
     // Start with history but compute NET for past GWs = points - event_transfers_cost
     const gwMap = new Map(
@@ -50,29 +50,30 @@ async function main() {
         (Number(x.points) || 0) - (Number(x.event_transfers_cost) || 0)
       ])
     );
-
-    // For the current GW, ensure we use NET = points - event_transfers_cost
-    try {
-      const picks = await getJson(`${BASE}/entry/${entryId}/event/${currentGW}/picks/`);
-      const eh = picks?.entry_history || {};
-      if (eh && Number.isFinite(Number(eh.points))) {
-        const gross = Number(eh.points) || 0;
-        const hit   = Number(eh.event_transfers_cost) || 0;
-        const net   = gross - hit;
-        gwMap.set(currentGW, net);
-      }
-    } catch (e) {
-      // If the picks endpoint fails, fall back to history value (often already net)
+ 
+    // For the current GW, derive the cell from the league standings so it tracks
+    // the same (leading) cadence as the Total column and never lags like the picks
+    // endpoint did (that lag made GW cells read low, e.g. 30, while Total was
+    // already settled at 66). We use total - (sum of settled earlier GWs) rather
+    // than event_total directly, so the value is guaranteed net of any transfer
+    // hits and sum(gwPoints) always equals total.
+    let settledEarlier = 0;
+    for (let gw = 1; gw < currentGW; gw++) {
+      const v = gwMap.get(gw);
+      if (Number.isFinite(v)) settledEarlier += v;
     }
-
+    if (Number.isFinite(Number(r.total))) {
+      gwMap.set(currentGW, Number(r.total) - settledEarlier);
+    }
+ 
     const gwPoints = [];
     for (let gw = 1; gw <= currentGW; gw++) gwPoints.push(gwMap.get(gw) ?? null);
-
+ 
     // transfers only for current GW
     const latestGwTransfers = transfers
       .filter(t => t.event === currentGW)
       .map(t => ({ in: t.element_in, out: t.element_out }));
-
+ 
     managers.push({
       teamName: r.entry_name,
       playerName: r.player_name,
@@ -82,10 +83,10 @@ async function main() {
       gwPoints,
       latestGwTransfers
     });
-
+ 
     await sleep(SLEEP_MS);
   }
-
+ 
   // map element ids -> names for nicer transfer text
   const elementsById = new Map(bootstrap.elements.map(e => [e.id, e.web_name]));
   for (const m of managers) {
@@ -94,7 +95,7 @@ async function main() {
       out: { id: t.out, name: elementsById.get(t.out) || String(t.out) }
     }));
   }
-
+ 
   // --- Validation: per-manager sum(gwPoints) should match reported total ---
   // This helps catch any net/gross inconsistencies before we publish.
   (() => {
@@ -117,17 +118,18 @@ async function main() {
   })();
   // default sort: total desc
   managers.sort((a, b) => b.total - a.total);
-
+ 
   const payload = {
     leagueId: LEAGUE_ID,
     generatedAt: new Date().toISOString(),
     currentGW,
     managers
   };
-
+ 
   const outPath = path.join(__dirname, '..', 'data.json');
   await fs.writeFile(outPath, JSON.stringify(payload));
   console.log(`Wrote data.json for league ${LEAGUE_ID}, currentGW=${currentGW}, managers=${managers.length}`);
 }
-
+ 
 main().catch(err => { console.error(err); process.exit(1); });
+

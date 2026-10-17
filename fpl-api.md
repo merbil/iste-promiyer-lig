@@ -234,11 +234,14 @@ How `scripts/build.mjs` uses the endpoints above to build `data.json`:
 
 | Endpoint | Why we call it |
 | --- | --- |
-| `/bootstrap-static/` | Find the current gameweek (`is_current`) and map player IDs → names for readable transfers. |
-| `/leagues-classic/{LEAGUE_ID}/standings/` | Get every manager in our mini-league (paginated). |
-| `/entry/{team-id}/history/` | Per-manager gameweek points and chip usage. |
+| `/bootstrap-static/` | Find the current gameweek (`is_current`), whether it's `finished`, and map player IDs → names, club short names and positions. |
+| `/leagues-classic/{LEAGUE_ID}/standings/` | Every manager in the mini-league (paginated) and `league.cup_league` for the cup. |
+| `/entry/{team-id}/history/` | Per-manager GW points, transfer hit cost and chip usage. |
 | `/entry/{team-id}/transfers/` | Per-manager transfers, filtered to the current GW. |
-| `/entry/{team-id}/event/{GW}/picks/` | Confirm the *net* current-GW points (points minus any −4 transfer hits). |
+| `/entry/{team-id}/event/{GW}/picks/` | The lineup: 15 picks with position, multiplier, captain/vice and `automatic_subs`. |
+| `/event/{GW}/live/` | Live points for every player this GW (one call, shared by all lineups). |
+| `/fixtures/?event={GW}` | Per-match BPS, to add *provisional* bonus before FPL confirms it. |
+| `/leagues-h2h-matches/league/{cup_league}/?event=38` | The league cup final, to find the cup winner. |
 
 The league ID lives in `scripts/build.mjs` as `const LEAGUE_ID = ...`. The GitHub
 Action in `.github/workflows/fpl-update.yaml` runs the script every 3 hours (and on
@@ -259,3 +262,25 @@ from such an environment does **not** mean the API is down — it means that par
 is blocked. GitHub Actions runners and normal home internet connections generally work
 fine. To sanity-check the API is alive, open an endpoint directly in a browser, e.g.
 `https://fantasy.premierleague.com/api/bootstrap-static/`.
+
+**3. Live player points can lag behind the league table.**
+`/event/{GW}/live/` `total_points` only includes bonus once FPL confirms it (about an hour
+after a match), while classic league totals already count provisional bonus. The build adds
+provisional bonus itself from each started fixture's `bps` stat: top 3 get 3/2/1, ties share
+(1,1,3 → 3,3,1; 1,2,2 → 3,2,2; 1,2,3,3 → 3,2,1,1). Skip a fixture once its `bonus` stat is filled.
+
+**4. Standings responses are cached and can briefly disagree.**
+Mid-gameweek, `/standings/` is served from a cache, and two requests a minute apart can
+return different totals (we saw one manager at 500, then 492). The next scheduled run
+fixes it; don't treat one odd number as a bug.
+
+**5. Picks only exist from the GW deadline onward.**
+`/entry/{id}/event/{GW}/picks/` returns 404 for a gameweek whose deadline hasn't passed, and
+`multiplier` / `automatic_subs` only reflect auto-subs after FPL processes them. Points in
+`entry_history` lag, so use live points × `multiplier` instead.
+
+**6. The league cup doesn't exist until late in the season.**
+`league.cup_league` is `null` (even with `has_cup: true`) until FPL creates the cup, around
+GW34. After that it's an H2H league; the final is in GW38 and each match has a `winner`
+(entry ID).
+

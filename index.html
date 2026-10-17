@@ -1,16 +1,38 @@
 <!doctype html>
-<html lang="en">
+<html lang="tr">
 <head>
   <meta charset="utf-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1" />
-  <title>FPL Mini League</title>
+  <title>İşte Promiyer Lig · FPL Mini League</title>
+  <meta name="description" content="İşte Promiyer Lig — live FPL mini league standings, gameweek points and period races." />
+  <meta name="theme-color" content="#37003c" />
+
+  <!-- Share previews (WhatsApp, Telegram, Slack…) -->
+  <meta property="og:type" content="website" />
+  <meta property="og:title" content="İşte Promiyer Lig" />
+  <meta property="og:description" content="FPL mini league standings, gameweek points and period races." />
+  <meta property="og:url" content="https://merbil.github.io/iste-promiyer-lig/" />
+  <meta name="twitter:card" content="summary" />
+
+  <link rel="icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><text y='.9em' font-size='90'>⚽</text></svg>" />
   <link rel="stylesheet" href="styles.css" />
+  <script>
+    // Apply a saved theme before first paint (no flash)
+    try { var t = localStorage.getItem('theme'); if (t === 'light' || t === 'dark') document.documentElement.dataset.theme = t; } catch (e) {}
+  </script>
 </head>
 <body>
   <main class="container">
-    <p class="meta">
-      GW loading… • Last update: <span id="last-update">—</span>
-    </p>
+    <header class="page-header">
+      <div class="title-row">
+        <h1>İşte Promiyer Lig</h1>
+        <div class="header-actions">
+          <button type="button" class="link-btn" data-open="hof-modal">🏆 Hall of Fame</button>
+          <button type="button" class="icon-btn" id="theme-toggle" aria-label="Koyu moda geç">🌙</button>
+        </div>
+      </div>
+      <p class="meta" id="meta">Loading…</p>
+    </header>
     <div class="table-wrap">
       <table id="league-table">
         <thead id="thead"></thead>
@@ -18,19 +40,43 @@
       </table>
     </div>
   </main>
+  <footer class="page-footer">
+    <p>İşte Promiyer Lig · Veriler FPL'den her 3 saatte bir güncellenir · <a href="#kurallar" class="text-link" data-open="rules-modal">Kurallar</a></p>
+  </footer>
+
+  <dialog id="hof-modal" class="modal" aria-labelledby="hof-title">
+    <div class="modal-head">
+      <h2 id="hof-title">🏆 Hall of Fame</h2>
+      <button type="button" class="modal-close" data-close aria-label="Kapat">✕</button>
+    </div>
+    <div class="modal-body" id="hof-body"><p class="hof-note">Loading…</p></div>
+  </dialog>
+
+  <dialog id="lineup-modal" class="modal modal-lineup" aria-labelledby="lineup-title">
+    <div class="modal-head">
+      <h2 id="lineup-title">Kadro</h2>
+      <button type="button" class="modal-close" data-close aria-label="Kapat">✕</button>
+    </div>
+    <div class="modal-body" id="lineup-body"></div>
+  </dialog>
+
+  <dialog id="rules-modal" class="modal modal-narrow" aria-labelledby="rules-title">
+    <div class="modal-head">
+      <h2 id="rules-title">📜 Kurallar</h2>
+      <button type="button" class="modal-close" data-close aria-label="Kapat">✕</button>
+    </div>
+    <div class="modal-body">
+      <ol class="rules">
+        <li>Katılım 2220 TL'dir, kişi başı 40 EUR'dan hesaplanmıştır.</li>
+        <li>Tüm ödüller EUR üzerinden belirtilmiştir.</li>
+        <li>Ödül tutarları gönderildiği günün Google kurundan hesaplanır.</li>
+        <li>Minimum kur 1 EUR = 55,5 TL olarak hesaplanacaktır.</li>
+        <li>Eşitlik durumunda ödül paylaşılır, tüm ödüller için geçerlidir.</li>
+        <li>Paylaşılan GW Liderliği 0,5 yazılır.</li>
+        <li>Ödüllerde eksiler &amp; chipler sonrası net GW puanı geçerlidir.</li>
+      </ol>
+    </div>
+  </dialog>
   <script src="script.js"></script>
-  <script>
-    (function () {
-      var m = document.querySelector('meta[name="viewport"]');
-      if (!m) return;
-      if (window.screen.width <= 600) {
-        m.setAttribute('content', 'width=1100');
-      } else {
-        m.setAttribute('content', 'width=device-width, initial-scale=1');
-      }
-    })();
-  </script>
 </body>
 </html>
-
-

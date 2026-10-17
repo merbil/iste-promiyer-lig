@@ -232,6 +232,8 @@ h1{ margin:0 0 4px; font-size:1.6rem; letter-spacing:.2px; color:var(--accent) }
 
 /* Rank + movement */
 #league-table td.rank { font-weight:600 }
+/* "Ovr. Rank" wraps onto two lines instead of widening the sticky column */
+#league-table thead th[data-key="rank"] { white-space:normal; line-height:1.15 }
 .move{ display:inline-block; min-width:2.2em; margin-left:4px; font-size:.75rem; font-weight:600; text-align:left }
 .move.up{ color:var(--up) }
 .move.down{ color:var(--down) }

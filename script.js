@@ -121,7 +121,7 @@ async function load() {
   // We keep a flat 'columns' array for rendering/sorting,
   // and also compute a two-tier header structure for grouping.
   const columns = [
-    { key: 'rank', label: 'Rank' },
+    { key: 'rank', label: 'Ovr. Rank' },
     { key: 'teamName', label: 'Team' },
     { key: 'total', label: 'Total' },
     { key: 'gwLeads', label: 'GW Leads' }
@@ -175,7 +175,7 @@ async function load() {
   const thead = document.getElementById('thead');
   thead.innerHTML = [
     `<tr>
-      <th rowspan="2" data-key="rank">Rank</th>
+      <th rowspan="2" data-key="rank" title="Overall league rank">Ovr. Rank</th>
       <th rowspan="2" data-key="teamName">Team</th>
       <th rowspan="2" data-key="total" class="sep-left">Total</th>
       <th rowspan="2" data-key="gwLeads">GW Leads</th>
